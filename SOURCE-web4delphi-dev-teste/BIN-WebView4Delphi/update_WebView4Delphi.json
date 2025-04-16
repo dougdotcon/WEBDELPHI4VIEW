@@ -1,0 +1,15 @@
+{
+  "UpdateLazPackages" : [
+    {
+      "ForceNotify" : true,
+      "InternalVersion" : 28,
+      "Name" : "webview4delphi.lpk",
+      "Version" : "1.0.3179.45"
+    }
+  ],
+  "UpdatePackageData" : {
+    "DisableInOPM" : false,
+    "DownloadZipURL" : "https://github.com/salvadordf/WebView4Delphi/archive/master.zip",
+    "Name" : "WebView4Delphi"
+  }
+}
