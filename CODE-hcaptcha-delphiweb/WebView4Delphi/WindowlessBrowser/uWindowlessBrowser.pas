@@ -31,6 +31,7 @@ type
     SpinEdit1: TSpinEdit;
     SpinEdit2: TSpinEdit;
     Button1: TButton;
+    StatusBar: TStatusBar;
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -59,6 +60,9 @@ type
       aExecutionID: Integer);
     procedure BtnClickHCWebviewClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure WVBrowser1NavigationCompleted(Sender: TObject; const aWebView: ICoreWebView2; const aArgs: ICoreWebView2NavigationCompletedEventArgs);
+    procedure WVBrowser1SourceChanged(Sender: TObject; const aWebView: ICoreWebView2; const aArgs: ICoreWebView2SourceChangedEventArgs);
+    procedure WVBrowser1NavigationError(Sender: TObject; aErrorCode: HRESULT; const aErrorMessage: wvstring);
 
   protected
     FWVDirectCompositionHost : TWVDirectCompositionHost;
@@ -255,20 +259,12 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  bExecutouScript                  :=False;
-  FExecJSCommandID                 := 0;
-  FExecJSMenuItem                  := nil;
-  FIsCapturingMouse                := False;
-  FIsTrackingMouse                 := False;
-  FDragAndDropInitialized          := False;
+  FWVDirectCompositionHost := TWVDirectCompositionHost.Create(Self);
+  FWVDirectCompositionHost.Parent := Self;
+  FWVDirectCompositionHost.Align := alClient;
 
-  WVBrowser1.DefaultURL            := AddressCb.Text;
-
-  FWVDirectCompositionHost         := TWVDirectCompositionHost.Create(self);
-  FWVDirectCompositionHost.Parent  := self;
-  FWVDirectCompositionHost.Align   := alClient;
-  FWVDirectCompositionHost.Browser := WVBrowser1;
-  FWVDirectCompositionHost.HandleNeeded;
+  if not GlobalWebView2Loader.Initialized then
+    GlobalWebView2Loader.StartWebView2;
 end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -280,37 +276,37 @@ end;
 procedure TMainForm.FormShow(Sender: TObject);
 begin
   if GlobalWebView2Loader.InitializationError then
-    showmessage(GlobalWebView2Loader.ErrorMessage)
-   else
-    if GlobalWebView2Loader.Initialized then
-      WVBrowser1.CreateWindowlessBrowser(FWVDirectCompositionHost.Handle)
-     else
-      Timer1.Enabled := True;
+    ShowMessage(GlobalWebView2Loader.ErrorMessage)
+  else if GlobalWebView2Loader.Initialized then
+  begin
+    WVBrowser1.CreateWindowlessBrowser(FWVDirectCompositionHost.Handle);
+    // Navegue para a URL inicial após criar o browser
+    if AddressCb.Text <> '' then
+      WVBrowser1.Navigate(AddressCb.Text);
+  end
+  else
+    Timer1.Enabled := True;
 end;
 
 procedure TMainForm.GoBtnClick(Sender: TObject);
 begin
-  WVBrowser1.Navigate(AddressCb.Text);
+  if WVBrowser1.Initialized then
+  begin
+    WVBrowser1.Navigate(AddressCb.Text);
+    StatusBar.SimpleText := 'Navegando...';
+  end
+  else
+  begin
+    ShowMessage('WebView não está inicializado. Aguarde...');
+  end;
 end;
 
 procedure TMainForm.WVBrowser1AfterCreated(Sender: TObject);
 begin
-  if FWVDirectCompositionHost.BuildDCompTreeUsingVisual then
-    begin
-      WVBrowser1.RootVisualTarget := FWVDirectCompositionHost.WebViewVisual;
-      // Substituído porque DCompDevice.Commit não está disponível
-      // FWVDirectCompositionHost.DCompDevice.Commit;
-    end;
-
-  FWVDirectCompositionHost.UpdateSize;
-  FWVDirectCompositionHost.SetFocus;
-
-  WVBrowser1.AllowExternalDrop := True;
-
-  InitializeDragAndDrop;
-
-  Caption := 'WindowlessBrowser';
-  AddressPnl.Enabled := True;
+  // Adicione este evento para confirmar quando o browser está pronto
+  StatusBar.SimpleText := 'Browser inicializado';
+  if AddressCb.Text <> '' then
+    WVBrowser1.Navigate(AddressCb.Text);
 end;
 
 procedure TMainForm.WVBrowser1ContextMenuRequested(Sender: TObject;
@@ -387,7 +383,13 @@ end;
 procedure TMainForm.WVBrowser1InitializationError(Sender: TObject;
   aErrorCode: HRESULT; const aErrorMessage: wvstring);
 begin
-  showmessage(aErrorMessage);
+  ShowMessage('Erro de inicialização: ' + aErrorMessage);
+end;
+
+procedure TMainForm.WVBrowser1NavigationError(Sender: TObject;
+  aErrorCode: HRESULT; const aErrorMessage: wvstring);
+begin
+  StatusBar.SimpleText := 'Erro de navegação: ' + aErrorMessage;
 end;
 
 procedure TMainForm.WVBrowser1RetrieveMHTMLCompleted(Sender: TObject;
@@ -453,10 +455,13 @@ end;
 procedure TMainForm.Timer1Timer(Sender: TObject);
 begin
   Timer1.Enabled := False;
-
   if GlobalWebView2Loader.Initialized then
-    WVBrowser1.CreateWindowlessBrowser(FWVDirectCompositionHost.Handle)
-   else
+  begin
+    WVBrowser1.CreateWindowlessBrowser(FWVDirectCompositionHost.Handle);
+    if AddressCb.Text <> '' then
+      WVBrowser1.Navigate(AddressCb.Text);
+  end
+  else
     Timer1.Enabled := True;
 end;
 
@@ -500,7 +505,7 @@ begin
 end;
 
 procedure TMainForm.MoveMouseTo(WebView: TWVBrowser; TargetX, TargetY: integer);
-var 
+var
   TempPoint: TPoint;
 begin
   TempPoint.x := TargetX;
@@ -582,7 +587,7 @@ begin
 end;
 
 procedure TMainForm.BtnTesteMoverClick(Sender: TObject);
-var 
+var
   iX: Integer;
 begin
   if WVBrowser1.Source <> 'https://smartapi.tech/token/mousemov.php' then
@@ -605,7 +610,7 @@ begin
 end;
 
 procedure TMainForm.MouseClick(WebView: TWVBrowser; TargetX, TargetY: integer);
-var 
+var
   point: TPoint;
 begin
   MoveMouseTo(WebView, TargetX, TargetY);
@@ -651,6 +656,16 @@ begin
   Result   := ScreenToClient(aPoint);
   Result.X := Result.X - FWVDirectCompositionHost.Left;
   Result.Y := Result.Y - FWVDirectCompositionHost.Top;
+end;
+
+procedure TMainForm.WVBrowser1NavigationCompleted(Sender: TObject; const aWebView: ICoreWebView2; const aArgs: ICoreWebView2NavigationCompletedEventArgs);
+begin
+  StatusBar.SimpleText := 'Navegação completa: ' + WVBrowser1.Source;
+end;
+
+procedure TMainForm.WVBrowser1SourceChanged(Sender: TObject; const aWebView: ICoreWebView2; const aArgs: ICoreWebView2SourceChangedEventArgs);
+begin
+  AddressCb.Text := WVBrowser1.Source;
 end;
 
 initialization

@@ -151,17 +151,12 @@ object MainForm: TMainForm
     Top = 160
   end
   object WVBrowser1: TWVBrowser
-    TargetCompatibleBrowserVersion = '95.0.1020.44'
+    DefaultURL = 'https://accounts.hcaptcha.com/demo'
+    TargetCompatibleBrowserVersion = '121.0.2277.86'
     AllowSingleSignOnUsingOSPrimaryAccount = False
-    OnInitializationError = WVBrowser1InitializationError
     OnAfterCreated = WVBrowser1AfterCreated
-    OnExecuteScriptCompleted = WVBrowser1ExecuteScriptCompleted
-    OnDocumentTitleChanged = WVBrowser1DocumentTitleChanged
-    OnWebMessageReceived = WVBrowser1WebMessageReceived
-    OnCursorChanged = WVBrowser1CursorChanged
-    OnRetrieveMHTMLCompleted = WVBrowser1RetrieveMHTMLCompleted
-    OnContextMenuRequested = WVBrowser1ContextMenuRequested
-    OnCustomItemSelected = WVBrowser1CustomItemSelected
+    OnNavigationCompleted = WVBrowser1NavigationCompleted
+    OnSourceChanged = WVBrowser1SourceChanged
     Left = 200
     Top = 160
   end
@@ -169,5 +164,14 @@ object MainForm: TMainForm
     OnMessage = ApplicationEvents1Message
     Left = 424
     Top = 160
+  end
+  object StatusBar: TStatusBar
+    Left = 0
+    Top = 656
+    Width = 995
+    Height = 22
+    Panels = <>
+    SimplePanel = True
+    SimpleText = ''
   end
 end
