@@ -1,0 +1,51 @@
+# Arquivos de compilação do Delphi
+*.dcu
+*.exe
+*.dll
+*.bpl
+*.bpi
+*.dcp
+*.so
+*.apk
+*.drc
+*.map
+*.dres
+*.rsm
+*.tds
+*.dcu
+*.lib
+*.a
+*.o
+*.ocx
+*.local
+*.identcache
+*.projdata
+*.tvsconfig
+*.dsk
+*.~*
+*.__overrides
+
+# Arquivos de histório e backup
+*.bak
+*.BAK
+__history/
+__recovery/
+*.~*
+
+# Arquivos de saída de compilação
+Win32/
+Win64/
+OSX32/
+iOSDevice/
+iOSSimulator/
+AndroidDevice/
+AndroidEmulator/
+
+# Pastas específicas
+/CustomCache/
+/Debug/
+/Release/
+
+# Arquivos de configuração local
+*.res
+*.stat 

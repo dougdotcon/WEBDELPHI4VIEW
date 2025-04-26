@@ -1,0 +1,51 @@
+INSTRUÇÕES PARA COMPILAÇÃO DO PROJETO CAPTCHASONIC
+
+1. REQUISITOS PRÉVIOS
+---------------------
+- Delphi Rio ou superior instalado
+- WebView4Delphi nas pastas do projeto (E:\DESENVOLVIMENTO\DEVELOPMENT\WEBDELPHI\TESTE\source)
+- Microsoft Edge WebView2 Runtime instalado (https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
+
+2. CONFIGURAÇÃO DO PROJETO
+--------------------------
+- As diretivas de compilação foram atualizadas para apontar para o local correto do WebView4Delphi
+- O caminho E:\DESENVOLVIMENTO\DEVELOPMENT\WEBDELPHI\TESTE\source deve conter todos os arquivos do WebView4Delphi
+- O arquivo .inc do WebView4Delphi é incluído em cada unidade do projeto através de {$I ..\source\webview4delphi.inc}
+
+3. ESTRUTURA DO PROJETO
+-----------------------
+O projeto consiste nos seguintes arquivos principais:
+- PopularCaptchaTester.dpr - Projeto principal
+- uMainForm.pas - Formulário principal e interface gráfica
+- uCaptchaSonic.pas - Implementação da integração com a API CaptchaSonic
+- uPopularCaptchaSolver.pas - Implementação do solucionador de captcha original
+
+4. PASSOS PARA COMPILAÇÃO
+-------------------------
+a) Abra o Delphi Rio (ou versão superior)
+b) Abra o arquivo PopularCaptchaTester.dpr
+c) Verifique as configurações do projeto:
+   - Vá para Project → Options → Delphi Compiler → Search path
+   - Adicione o caminho E:\DESENVOLVIMENTO\DEVELOPMENT\WEBDELPHI\TESTE\source se não estiver presente
+d) Compile o projeto (Shift+F9)
+e) Execute o projeto (F9)
+
+5. SOLUCIONANDO PROBLEMAS COMUNS
+--------------------------------
+- Se ocorrerem erros de unidades não encontradas:
+  * Verifique se o WebView4Delphi está instalado corretamente na pasta source
+  * Certifique-se de que as diretivas {$I ..\source\webview4delphi.inc} estão presentes em todos os arquivos .pas
+  
+- Se ocorrerem erros de runtime ao executar o aplicativo:
+  * Verifique se o Microsoft Edge WebView2 Runtime está instalado corretamente
+  * Teste em modo não-headless primeiro para verificar se a comunicação com o WebView está funcionando
+
+- Para uso em produção:
+  * Ative o modo headless para melhor performance
+  * Configure a API key correta do CaptchaSonic no campo apropriado da interface
+
+6. API CAPTCHASONIC
+------------------
+- A API key padrão (sonic_144b3b7c412414e2ce4ebfaa6a8f71d4657c) deve ser substituída pela sua própria chave
+- Cada solução de captcha consome créditos da sua conta CaptchaSonic
+- Para obter uma chave de API, registre-se em https://my.captchasonic.com/ 
